@@ -1,12 +1,7 @@
 import express, { Express, Request, Response } from 'express';
-
 import ServerConfig from './config/server.config';
-import { PrismaClient } from '@prisma/client';
 import apiRouter from './routes';
 import cookieParser from "cookie-parser";
-
-export { PrismaClient } from '@prisma/client';
-const prisma = new PrismaClient();
 
 const app : Express = express();
 

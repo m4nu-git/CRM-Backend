@@ -1,14 +1,23 @@
 import { PrismaClient, User } from '@prisma/client';
+import CreateUser from '../dtos/createUser.dto';
+import CreateUserDTO from '../dtos/createUser.dto';
 const prisma = new PrismaClient();
 
 class UserRepository {
 
-    async create() {
-
+    async create(userDetails: CreateUserDTO) : Promise<User> {
+        const user = await prisma.user.create({
+            data: {
+                name: userDetails.name,
+                email: userDetails.email,
+                password: userDetails.password
+            }
+        })
+        return user;
     }
 
     async get(userId: string) : Promise<User | null> {
-        const user = prisma.user.findUnique({
+        const user = await prisma.user.findUnique({
             where: {
                 id: userId
             }
@@ -17,8 +26,17 @@ class UserRepository {
     }
 
     async getAll() : Promise<User[]> {
-        const users = prisma.user.findMany();
+        const users = await prisma.user.findMany();
         return users;
+    }
+
+    async getUserByEmail(userEmail: string) : Promise<User | null> {
+        const user = await prisma.user.findUnique({
+            where: {
+                email: userEmail
+            }
+        });
+        return user;
     }
 
     async delete() {

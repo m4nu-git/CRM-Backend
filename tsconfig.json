@@ -20,6 +20,8 @@
     "noFallthroughCasesInSwitch": true,
     "noUncheckedIndexedAccess": true,
     "noImplicitOverride": true,
+    "experimentalDecorators": true,
+    "strictPropertyInitialization": false,
 
     // Some stricter flags (disabled by default)
     "noUnusedLocals": false,
