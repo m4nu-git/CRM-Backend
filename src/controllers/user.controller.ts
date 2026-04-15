@@ -1,6 +1,6 @@
 import { Request, Response } from "express";
 import UserRepository from "../repositories/user.repository"
-import UserService from "../services/user.services"
+import UserService from "../services/user.service"
 import { StatusCodes } from "http-status-codes";
 import GenericError from "../errors/genericError";
 import { unknownErrorResponse } from "../utils/response.utils";
