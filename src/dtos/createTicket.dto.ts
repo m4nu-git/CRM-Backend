@@ -10,6 +10,18 @@ export default class CreateTicketDto {
     @IsString()
     description: string;
 
+    @IsString()
+    @IsEmail()
+    assignee: string;
+
+    @IsString()
+    @IsEmail()
+    assignedTo: string;
+
+    @IsString()
+    @IsEmail()
+    createdBy: string
+
 
     clientName: string;
 
@@ -17,6 +29,9 @@ export default class CreateTicketDto {
     constructor(title: string, description: string, clientName: string) {
         this.title = title;
         this.description = description;
+        this.assignee = "";
+        this.assignedTo = "";
+        this.createdBy = "";
         this.clientName = clientName;
     }
 }
