@@ -1,5 +1,8 @@
-import { PrismaClient, User } from '@prisma/client';
+import { PrismaClient, User, Role } from '@prisma/client';
 import CreateUserDTO from '../dtos/createUser.dto';
+import Engineer from '../types/engineer';
+import { JsonObject } from '@prisma/client/runtime/library';
+import NotFoundError from '../errors/notFound';
 const prisma = new PrismaClient();
 
 class UserRepository {
@@ -38,6 +41,17 @@ class UserRepository {
         return user;
     }
 
+    async getEngineers() : Promise<User[]> {
+        const users = await prisma.user.findMany({
+            where : {
+                role: {
+                    hasSome: [Role.ENGINEER]
+                } 
+            }
+        })
+        return users;
+    }
+
     async delete() {
         
     }
@@ -54,6 +68,73 @@ class UserRepository {
             }
         })
         return user;
+    }
+
+    async addAssignedTicket(id: string, ticketId: string) {
+        const user = await prisma.user.update({
+            where: {
+                id: id,
+                role: {
+                    hasSome: ["ENGINEER"]
+                }
+            },
+            data: {
+                ticketsAssigned: {
+                    push: ticketId
+                }
+            }
+        });
+        return user;
+    }
+
+    async getAvailableEngineer() : Promise<Engineer> {
+        const response = await prisma.user.aggregateRaw({
+            pipeline: [
+                {
+                    $match: {
+                        "roles": {
+                            "$in": ["ENGINEER"]
+                        }
+                    }
+                },
+                {
+                    $project: {
+                        id: 1,
+                        email: 1,
+                        ticketsAssignedCount: { 
+                            $cond: {
+                                if: { $isArray: "$ticketsAssigned" },
+                                then: { $size: "$ticketsAssigned" },
+                                else: 0
+                            }
+                         } // include a new field in every doc
+                    }
+                },
+                {
+                    $sort: {
+                        ticketsAssignedCount: 1 // sorting the documents
+                    }
+                },
+                {
+                    $limit: 1 // limit to the first doc
+                }
+            ]
+        });
+        console.log(response);
+
+        console.log(typeof response[0] === 'object', (response[0] as JsonObject)._id, (response[0] as JsonObject).email, (response[0] as JsonObject).ticketsAssignedCount)
+        if(typeof response[0] === 'object' && (response[0] as JsonObject)._id && (response[0] as JsonObject).email && (response[0] as JsonObject).ticketsAssignedCount) {
+            const idObject = ((response[0] as JsonObject)._id as {'$oid': string});
+            // _id: {'$oid' : 'asdfa' }
+            const engineer: Engineer = {
+                id: idObject['$oid'],
+                email: (response[0] as JsonObject).email as string,
+                ticketsAssignedCount: (response[0] as JsonObject).ticketsAssignedCount as number
+            };
+            console.log(engineer);
+            return engineer;
+        }
+        throw new NotFoundError("User", "role", "Engineer");
     }
 }
 

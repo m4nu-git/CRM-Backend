@@ -11,6 +11,7 @@
   },
   "devDependencies": {
     "@prisma/client": "6",
+    "@types/bson": "^4.2.4",
     "@types/bun": "latest",
     "@types/cookie-parser": "^1.4.10",
     "@types/express": "^5.0.6",
