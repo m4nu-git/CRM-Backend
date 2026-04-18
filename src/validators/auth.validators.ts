@@ -69,3 +69,21 @@ export function isEngineer(req: Request, res: Response, next: NextFunction) {
         });
     }
 }
+
+export function isAdminOrEngineer(req: Request, res: Response, next: NextFunction) {
+    try {
+        const role: string[] = (req as RequestWithUser).user.role;
+        if (role.find(role => (role === 'ENGINNER' || role === 'ADMIN'))) {
+            next();
+        } else {
+            throw new UnauthorisedError();
+        }
+    } catch (error) {
+        return res.status(StatusCodes.UNAUTHORIZED).json({
+            err: new UnauthorisedError(),
+            data: {},
+            success: false,
+            message: 'You\'re not authorised to do this operation'
+        });
+    }
+}

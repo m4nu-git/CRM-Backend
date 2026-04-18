@@ -87,12 +87,32 @@ class UserRepository {
         return user;
     }
 
+    async isUserEngineer(userEmail: string) : Promise<boolean> {
+        const user =  await prisma.user.findUnique({
+            where: {
+                email: userEmail
+            }
+        });
+        if (!user) return false;
+        return user.role.includes("ENGINEER");
+    }
+
+    async isUserAdmin(userEmail: string) : Promise<boolean> {
+        const user =  await prisma.user.findUnique({
+            where: {
+                email: userEmail
+            }
+        });
+        if (!user) return false;
+        return user.role.includes("ENGINEER");
+    }
+
     async getAvailableEngineer() : Promise<Engineer> {
         const response = await prisma.user.aggregateRaw({
             pipeline: [
                 {
                     $match: {
-                        "roles": {
+                        "role": {
                             "$in": ["ENGINEER"]
                         }
                     }
@@ -123,7 +143,7 @@ class UserRepository {
         console.log(response);
 
         console.log(typeof response[0] === 'object', (response[0] as JsonObject)._id, (response[0] as JsonObject).email, (response[0] as JsonObject).ticketsAssignedCount)
-        if(typeof response[0] === 'object' && (response[0] as JsonObject)._id && (response[0] as JsonObject).email && (response[0] as JsonObject).ticketsAssignedCount) {
+        if(typeof response[0] === 'object' && (response[0] as JsonObject)._id && (response[0] as JsonObject).email && (response[0] as JsonObject).ticketsAssignedCount !== undefined) {
             const idObject = ((response[0] as JsonObject)._id as {'$oid': string});
             // _id: {'$oid' : 'asdfa' }
             const engineer: Engineer = {

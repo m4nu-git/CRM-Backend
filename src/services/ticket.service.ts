@@ -1,8 +1,11 @@
-import { Ticket } from "@prisma/client";
+import { Ticket, Prisma } from "@prisma/client";
 import TicketRepository from "../repositories/ticket.repository";
 import CreateTicketDto from "../dtos/createTicket.dto";
 import UserRepository from "../repositories/user.repository";
 import NotFoundError from "../errors/notFound";
+import UpdateTicketDto from "../dtos/updateTicket.dto";
+import BadRequestError from "../errors/badRequest";
+import InternalServerError from "../errors/internalServerError";
 
 export default class TicketService {
     private ticketRepository: TicketRepository;
@@ -26,8 +29,36 @@ export default class TicketService {
             ticket = await this.ticketRepository.update(ticket.id, {createdBy: createdBy.email, assignedTo: engineer.email});
             return ticket;
         } catch(error) {
+            if (error instanceof BadRequestError) {
+                throw error;
+            }
             console.log(error);
             throw error;
+        }
+    }
+
+    async updateTicket(ticketId: string, ticketDetails: UpdateTicketDto, userId: string, userEmail: string) {
+        try {
+            const areWeUpdatingAssignedTo = ticketDetails.assignedTo !== undefined;
+             /**
+             * We want to make sure assignedTo always has an email of an admin or an engineer
+             */
+
+             if(areWeUpdatingAssignedTo) {
+                if(!(await this.userRepository.isUserAdmin(ticketDetails.assignedTo) || await this.userRepository.isUserEngineer(ticketDetails.assignedTo))) {
+                    throw new BadRequestError("assignedTo email is not a valid engineer or admin")
+                }
+            }
+
+            const updateObject = (areWeUpdatingAssignedTo) ? {...ticketDetails, updatedAt: new Date(), assignee: userEmail} : {...ticketDetails, updatedAt: new Date()};
+            const ticket = await this.ticketRepository.update(ticketId, updateObject as Partial<Prisma.TicketUpdateInput>);
+            return ticket;
+        } catch (error) {
+            if (error instanceof BadRequestError) {
+                throw error;
+            }
+            console.log(error);
+            throw new InternalServerError();
         }
     }
 
