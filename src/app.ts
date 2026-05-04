@@ -13,6 +13,8 @@ app.use(cookieParser());
 
 app.use('/api', apiRouter)
 
+// this command for testing PR workflow
+
 app.get('/ping', (req: Request, res: Response) => {
     return res.status(200).json({msg: 'ok with changes'})
 })
