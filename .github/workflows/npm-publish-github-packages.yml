@@ -25,6 +25,8 @@ jobs:
       # Install dependencies
       - run: bun install
 
+      - run: bun run build
+
       # Run tests
       - run: bun test
 
