@@ -37,4 +37,8 @@ jobs:
       - run: bun test
 
       # Restart server
-      - run: pm2 restart backendserver
+      - name: Start or Restart PM2 
+        run: |
+          pm2 restart backendserver > /dev/null \
+          && pm2 restart backendserver \
+          || pm2 start dist/index.js --name backendserver
