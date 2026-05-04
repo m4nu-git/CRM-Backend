@@ -1,0 +1,34 @@
+name: Bun CI
+
+on:
+  pull_request:
+    branches: [master]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      # Install Bun
+      - name: Install Bun
+        run: |
+          sudo apt-get update && sudo apt-get install -y unzip
+          curl -fsSL https://bun.sh/install | bash
+
+      # Add Bun to PATH
+      - name: Setup Bun PATH
+        run: echo "$HOME/.bun/bin" >> $GITHUB_PATH
+
+      # Install dependencies
+      - name: Install dependencies
+        run: bun install
+
+      # Generate Prisma client
+      - name: Setup Prisma client
+        run: cd src && bunx prisma generate
+
+      # Run tests
+      - name: Run tests
+        run: bun test
