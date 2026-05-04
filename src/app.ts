@@ -16,7 +16,7 @@ app.use('/api', apiRouter)
 // this command for testing PR workflow
 
 app.get('/ping', (req: Request, res: Response) => {
-    return res.status(201).json({msg: 'ok with changes'})
+    return res.status(200).json({msg: 'ok with changes'})
 })
 
 export default app;
